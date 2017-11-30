@@ -9,13 +9,17 @@ var notes = require(process.env.NOTES_MODEL ? path.join('..', process.env.NOTES_
 const log   = require('debug')('notes:router-notes');
 const error = require('debug')('notes:error');
 
+const usersRouter = require('./users');
+
 // Add Note. (create)
-router.get('/add', (req, res, next) => {
+router.get('/add', usersRouter.ensureAuthenticated, (req, res, next) => {
+    var user = req.user ? req.user : undefined;
     res.render('noteedit', {
         title: "Add a Note",
         docreate: true,
         notekey: "",
         note: undefined,
+        user: user,
         breadcrumbs: [
             { href: '/', text: 'Home' },
             { active: true, text: "Add Note" }
@@ -25,7 +29,7 @@ router.get('/add', (req, res, next) => {
 });
 
 // Save Note (update)
-router.post('/save', (req, res, next) => {
+router.post('/save', usersRouter.ensureAuthenticated, (req, res, next) => {
     var p;
     if (req.body.docreate === "create") {
         p = notes.create(req.body.notekey,
@@ -44,10 +48,12 @@ router.post('/save', (req, res, next) => {
 router.get('/view', (req, res, next) => {
     notes.read(req.query.key)
     .then(note => {
+        var user = req.user ? req.user : undefined;
         res.render('noteview', {
             title: note ? note.title : "",
             notekey: req.query.key,
             note: note,
+            user: user,
             breadcrumbs: [
                 { href: '/', text: 'Home' },
                 { active: true, text: note.title }
@@ -58,15 +64,17 @@ router.get('/view', (req, res, next) => {
 });
 
 // Edit note (update)
-router.get('/edit', (req, res, next) => {
+router.get('/edit', usersRouter.ensureAuthenticated, (req, res, next) => {
     notes.read(req.query.key)
     .then(note => {
+        var user = req.user ? req.user : undefined;
         res.render('noteedit', {
             title: note ? ("Edit " + note.title) : "Add a Note",
             docreate: false,
             notekey: req.query.key,
             note: note,
             hideAddNote: true,
+            user: user,
             breadcrumbs: [
                 { href: '/', text: 'Home' },
                 { active: true, text: note.title }
@@ -77,13 +85,15 @@ router.get('/edit', (req, res, next) => {
 });
 
 // Ask to Delete note (destroy)
-router.get('/destroy', (req, res, next) => {
+router.get('/destroy', usersRouter.ensureAuthenticated, (req, res, next) => {
     notes.read(req.query.key)
     .then(note => {
+        var user = req.user ? req.user : undefined;
         res.render('notedestroy', {
             title: note ? note.title : "",
             notekey: req.query.key,
             note: note,
+            user: user,
             breadcrumbs: [
                 { href: '/', text: 'Home' },
                 { active: true, text: 'Delete Note' }
@@ -94,7 +104,7 @@ router.get('/destroy', (req, res, next) => {
 });
 
 // Really destroy note (destroy)
-router.post('/destroy/confirm', (req, res, next) => {
+router.post('/destroy/confirm', usersRouter.ensureAuthenticated, (req, res, next) => {
     notes.destroy(req.body.notekey)
     .then(() => { res.redirect('/'); })
     .catch(err => { next(err); });

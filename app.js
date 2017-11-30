@@ -1,20 +1,22 @@
 'use strict';
 
-var util = require('util');
-var express = require('express');
-var path = require('path');
-var fs   = require('fs');
-var favicon = require('serve-favicon');
-var logger = require('morgan');
-var FileStreamRotator = require('file-stream-rotator');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
+const util = require('util');
+const express = require('express');
+const path = require('path');
+const fs   = require('fs');
+const favicon = require('serve-favicon');
+const logger = require('morgan');
+const FileStreamRotator = require('file-stream-rotator');
+const cookieParser = require('cookie-parser');
+const bodyParser = require('body-parser');
+const session = require('express-session')
+const FileStore = require('session-file-store')(session);
 
-var routes = require('./routes/index');
-// var users = require('./routes/users');
-var notes  = require('./routes/notes');
+const routes = require('./routes/index');
+const users  = require('./routes/users'); 
+const notes  = require('./routes/notes');
 
-var error = require('debug')('notes:error');
+const error = require('debug')('notes:error');
 
 process.on('uncaughtException', function(err) {
   error("I've crashed!!! - "+ (err.stack || err));
@@ -47,13 +49,24 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 // app.use('/vendor/bootstrap/css', express.static(path.join(__dirname, 'cyborg')));
-app.use('/vendor/bootstrap/css', express.static(path.join(__dirname, 'cyborg')));
-app.use('/vendor/bootstrap/fonts', express.static(path.join(__dirname, 'cyborg')));
+app.use('/vendor/bootstrap/css', express.static(path.join(__dirname, 'bower_components', 'bootstrap', 'dist', 'css')));
+app.use('/vendor/bootstrap/fonts', express.static(path.join(__dirname, 'bower_components', 'bootstrap', 'dist', 'fonts')));
 app.use('/vendor/bootstrap/js', express.static(path.join(__dirname, 'bower_components', 'bootstrap', 'dist', 'js')));
 app.use('/vendor/jquery', express.static(path.join(__dirname, 'bower_components', 'jquery', 'dist')));
 
+app.use(session({
+  store: new FileStore({
+    path: "sessions"
+  }),
+  secret: 'keyboard mouse',
+  resave: true,
+  saveUninitialized: true
+}));
+
+users.initPassport(app);
+
 app.use('/', routes);
-// app.use('/users', users);
+app.use('/users', users.router);
 app.use('/notes', notes);
 
 // catch 404 and forward to error handler

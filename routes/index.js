@@ -11,6 +11,7 @@ const error = require('debug')('notes:error');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
+    var notelist;
     notes.keylist()
     .then(keylist => {
         var keyPromises = keylist.map(key => {
@@ -21,10 +22,11 @@ router.get('/', function(req, res, next) {
         return Promise.all(keyPromises);
     })
     .then(notelist => {
-        log('HOMEPAGE notelist='+ util.inspect(notelist));
+        var user = req.user ? req.user : undefined;
         res.render('index', {
             title: 'Notes',
             notelist: notelist,
+            user: user,
             breadcrumbs: [
                 { href: '/', text: 'Home' }
             ]
