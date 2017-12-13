@@ -1,6 +1,6 @@
 dbname: notes
-username: .. user
-password: .. password
+username: root
+password: f000glip
 params:
     host: localhost
     port: 3306

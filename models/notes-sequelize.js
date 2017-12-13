@@ -10,6 +10,8 @@ const error   = require('debug')('notes:error');
 
 const Note    = require('./Note');
 
+exports.events = require('./notes-events');
+
 var SQNote;
 var sequlz;
 
@@ -45,23 +47,39 @@ exports.create = function(key, title, body) {
             title: title,
             body: body
         });
+    })
+    .then(newnote => {
+        exports.events.noteCreated({
+            key: newnote.key,
+            title: newnote.title,
+            body: newnote.body
+        });
+        return newnote;
     });
 };
 
 exports.update = function(key, title, body) {
     return exports.connectDB()
     .then(SQNote => {
-        return SQNote.find({ where: { notekey: key } })
-        .then(note => {
-            if (!note) {
-                throw new Error("No note found for key " + key);
-            } else {
-                return note.updateAttributes({
-                    title: title,
-                    body: body
-                });
-            }
+        return SQNote.find({ where: { notekey: key } });
+    })
+    .then(note => {
+        if (!note) {
+            throw new Error("No note found for key " + key);
+        } else {
+            return note.updateAttributes({
+                title: title,
+                body: body
+            });
+        }
+    })
+    .then(newnote => {
+        exports.events.noteUpdate({
+            key,
+            title: newnote.title,
+            body: newnote.body
         });
+        return newnote;
     });
 };
 
@@ -69,13 +87,12 @@ exports.read = function(key) {
     return exports.connectDB()
     .then(SQNote => {
         return SQNote.find({ where: { notekey: key } })
-        .then(note => {
-            if (!note) {
-                throw new Error("No note found for " + key);
-            } else {
-                return new Note(note.notekey, note.title, note.body);
-            }
-        });
+    })
+    .then(note => {
+        if (!note) {
+            throw new Error("No note found for " + key);
+        }
+        return new Note(note.notekey, note.title, note.body);
     });
 };
 
@@ -83,9 +100,11 @@ exports.destroy = function(key) {
     return exports.connectDB()
     .then(SQNote => {
         return SQNote.find({ where: { notekey: key } })
-        .then(note => {
-            return note.destroy();
-        });
+    })
+    .then(note => note.destroy())
+    .then(() => {
+        exports.events.noteDestroy({ key });
+        return;
     });
 };
 
@@ -93,20 +112,20 @@ exports.keylist = function() {
     return exports.connectDB()
     .then(SQNote => {
         return SQNote.findAll({ attributes: [ 'notekey' ] })
-        .then(notes => {
-            return notes.map(note => note.notekey);
-        });
+    })
+    .then(notes => {
+        return notes.map(note => note.notekey);
     });
 };
 
 exports.count = function() {
     return exports.connectDB()
     .then(SQNote => {
-        return SQNote.count()
-        .then(count => {
-            log('COUNT '+ count);
-            return count;
-        });
+        return SQNote.count();
+    })
+    .then(count => {
+        log('COUNT '+ count);
+        return count;
     });
 };
 

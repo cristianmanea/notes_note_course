@@ -34,6 +34,14 @@ exports.create = function(key, title, body) {
         return collection.insertOne({
             notekey: key, title: title, body: body
         }).then(result => { return note; });
+    })
+    .then(newnote => {
+        exports.events.noteCreated({
+            key: newnote.key,
+            title: newnote.title,
+            body: newnote.body
+        });
+        return newnote;
     });
 };
 
@@ -46,6 +54,14 @@ exports.update = function(key, title, body) {
         return collection.updateOne({ notekey: key },
             { $set: { title: title, body: body } })
         .then(result => { return note; } );
+    })
+    .then(newnote => {
+        exports.events.noteUpdate({
+            key,
+            title: newnote.title,
+            body: newnote.body
+        });
+        return newnote;
     });
 };
 
@@ -69,6 +85,10 @@ exports.destroy = function(key) {
         var collection = db.collection('notes');
         log('DELETE '+ key);
         return collection.findOneAndDelete({ notekey: key });
+    })
+    .then(() => {
+        exports.events.noteDestroy({ key });
+        return;
     });
 };
 

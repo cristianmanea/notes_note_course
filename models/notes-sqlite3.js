@@ -41,6 +41,14 @@ exports.create = function(key, title, body) {
                     }
             });
         });
+    })
+    .then(newnote => {
+        exports.events.noteCreated({
+            key: newnote.key,
+            title: newnote.title,
+            body: newnote.body
+        });
+        return newnote;
     });
 };
 
@@ -59,6 +67,14 @@ exports.update = function(key, title, body) {
                     }
             });
         });
+    })
+    .then(newnote => {
+        exports.events.noteUpdate({
+            key,
+            title: newnote.title,
+            body: newnote.body
+        });
+        return newnote;
     });
 };
 
@@ -90,6 +106,10 @@ exports.destroy = function(key) {
                 }
             });
         });
+    })
+    .then(() => {
+        exports.events.noteDestroy({ key });
+        return;
     });
 };
 

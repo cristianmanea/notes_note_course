@@ -12,15 +12,7 @@ const error = require('debug')('notes:error');
 /* GET home page. */
 router.get('/', function(req, res, next) {
     var notelist;
-    notes.keylist()
-    .then(keylist => {
-        var keyPromises = keylist.map(key => {
-            return notes.read(key).then(note => {
-                return { key: note.key, title: note.title };
-            });
-        });
-        return Promise.all(keyPromises);
-    })
+    getKeyTitlesList()
     .then(notelist => {
         var user = req.user ? req.user : undefined;
         res.render('index', {
@@ -32,7 +24,30 @@ router.get('/', function(req, res, next) {
             ]
         });
     })
-    .catch(err => { error(err); next(err); });
+    .catch(err => { error('home page '+ err); next(err); });
 });
 
 module.exports = router;
+
+var getKeyTitlesList = function() {
+    return notes.keylist()
+    .then(keylist => {
+        var keyPromises = keylist.map(key => {
+            return notes.read(key).then(note => {
+                return { key: note.key, title: note.title };
+            });
+        });
+        return Promise.all(keyPromises);
+    });
+};
+
+module.exports.socketio = function(io) {
+    var emitNoteTitles = () => {
+        getKeyTitlesList().then(notelist => {
+            io.of('/home').emit('notetitles', { notelist });
+        });
+    };
+    notes.events.on('notecreated', emitNoteTitles);
+    notes.events.on('noteupdate',  emitNoteTitles);
+    notes.events.on('notedestroy', emitNoteTitles);
+};

@@ -61,6 +61,18 @@ exports.find = function(username) {
     });
 };
 
+exports.exists = function(username) {
+    return connectREST().then(client => {
+        return new Promise((resolve, reject) => {
+            client.get('/exists/'+ username,
+            (err, req, res, obj) => {
+                if (err) return reject(err);
+                resolve(obj);
+            });
+        });
+    });
+};
+
 exports.userPasswordCheck = function(username, password) {
     return connectREST().then(client => {
         return new Promise((resolve, reject) => {

@@ -85,7 +85,7 @@ passport.use(new LocalStrategy(
       }
       return check;
     })
-    .catch(err => done(err));
+    .catch(err => { error('LocalStrategy '+ err.stack); done(err); });
   }
 ));
 
@@ -102,13 +102,13 @@ passport.use(new TwitterStrategy({
       photos: profile.photos, emails: profile.emails
     })
     .then(user => done(null, user))
-    .catch(err => done(err));
+    .catch(err => { error('TwitterStrategy '+ err.stack); done(err); });
   }
 ));
 
 passport.serializeUser(function(user, done) {
   log('serializeUser '+ util.inspect(user));
-  done(null, user.username);
+  done(undefined, user.username);
 });
 
 passport.deserializeUser(function(username, done) {
@@ -118,5 +118,5 @@ passport.deserializeUser(function(username, done) {
     log('... found user '+ util.inspect(user));
     done(null, user);
   })
-  .catch(err => done(err));
+  .catch(err => { error('deserializeUser '+ err.stack); done(err); });
 });

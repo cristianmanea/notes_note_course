@@ -3,9 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "SEQUELIZE_CONNECT=models/sequelize-sqlite.yaml NOTES_MODEL=models/notes-sequelize USERS_MODEL=models/users-rest USER_SERVICE_URL=http://localhost:3333 node ./bin/www",
-    "start-server1": "SEQUELIZE_CONNECT=models/sequelize-sqlite.yaml NOTES_MODEL=models/notes-sequelize USERS_MODEL=models/users-rest USER_SERVICE_URL=http://localhost:3333 PORT=3000 node ./bin/www",
-    "start-server2": "SEQUELIZE_CONNECT=models/sequelize-sqlite.yaml NOTES_MODEL=models/notes-sequelize USERS_MODEL=models/users-rest USER_SERVICE_URL=http://localhost:3333 PORT=3002 node ./bin/www",
+    "start": "SEQUELIZE_CONNECT=models/sequelize-sqlite.yaml NOTES_MODEL=models/notes-sequelize USERS_MODEL=models/users-rest USER_SERVICE_URL=http://localhost:3333 node ./app",
+    "start-server1": "SEQUELIZE_CONNECT=models/sequelize-sqlite.yaml NOTES_MODEL=models/notes-sequelize USERS_MODEL=models/users-rest USER_SERVICE_URL=http://localhost:3333 PORT=3000 node ./app",
+    "start-server2": "SEQUELIZE_CONNECT=models/sequelize-sqlite.yaml NOTES_MODEL=models/notes-sequelize USERS_MODEL=models/users-rest USER_SERVICE_URL=http://localhost:3333 PORT=3002 node ./app",
     "start-fs": "NOTES_MODEL=models/notes-fs node ./bin/www",
     "server1-fs": "NOTES_MODEL=models/notes-fs PORT=3001 node ./bin/www",
     "server2-fs": "NOTES_MODEL=models/notes-fs PORT=3002 node ./bin/www",
@@ -25,6 +25,7 @@
     "server2-mongodb": "MONGO_URL=mongodb://localhost/chap07 NOTES_MODEL=models/notes-mongodb PORT=3002 node ./bin/www",
     "server1": "PORT=3001 node ./bin/www",
     "server2": "PORT=3002 node ./bin/www",
+    "test-notes-memory": "MODEL_TO_TEST=../models/notes-memory mocha",
     "postinstall": "sudo bower install 'boostrap#3.3.6' --allow-root && sudo chown -R cristian bower_components",
     "bootstrapsetup": "cd bower_components/bootstrap && npm install && npm install grunt-cli ",
     "buildbootstrap": "cp variables.less bower_components/bootstrap/less && cd bower_components/bootstrap && grunt"
@@ -52,13 +53,15 @@
     "passport-twitter": "^1.0.4",
     "passport.socketio": "^3.7.0",
     "restify": "^4.3.2",
-    "sequelize": "^3.19.2",
+    "sequelize": "^3.31.1",
     "serve-favicon": "~2.3.0",
     "session-file-store": "^1.2.0",
     "socket.io": "^1.7.4",
     "sqlite3": "3.1.x"
   },
   "devDependencies": {
-    "bower": "^1.7.7"
+    "bower": "^1.7.7",
+    "chai": "^3.5.0",
+    "mocha": "^2.5.3"
   }
 }
